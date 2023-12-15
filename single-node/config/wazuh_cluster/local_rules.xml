@@ -1,0 +1,46 @@
+<!-- Local rules -->
+
+<!-- Copyright (C) 2015, Wazuh Inc. -->
+
+<!-- CUSTOM: Disabilita il falso positivo di /bin/diff -->
+<group name="rootcheck,ossec,">
+  <rule id="510" level="0" overwrite="yes">
+    <match>/bin/diff</match>
+    <description>Ignore 510 rootcheck on /bin/diff</description>
+  </rule>
+</group>
+
+
+<!-- CUSTOM: Set di regole con controllo dell'IP sorgente -->
+<group name="ipcheck,">
+    <rule id="100100" level="6">
+        <field name="integration">custom-ip-check</field>
+        <description>Ip-Check: IP Address found in a blacklist.</description>
+    </rule>
+    <rule id="100101" level="8">
+        <if_sid>100100</if_sid>
+        <field name="source.rule.groups" type="osmatch">sshd</field>
+        <field name="source.rule.groups" type="osmatch">authentication_failed</field>
+        <field name="source.full_log" type="osmatch" negate="yes">preauth</field> <!-- Fix SSH double match --> 
+        <description>SSH authentication failed from a blacklisted IP.</description>
+        <group>,ban</group>
+    </rule>
+    <rule id="100102" level="14">
+        <if_sid>100100</if_sid>
+        <field name="source.rule.groups" type="osmatch">authentication_success</field>
+        <description>WARNING: Authentication success from a blacklisted IP.</description>
+    </rule>
+    <rule id="100103" level="8">
+        <if_sid>100100</if_sid>
+        <field name="source.rule.groups" type="osmatch">ftp</field>
+        <field name="source.rule.groups" type="osmatch">authentication_failed</field>
+        <description>FTP authentication failed from a blacklisted IP.</description>
+        <group>,ban</group>
+    </rule>
+    <rule id="100104" level="8">
+        <if_sid>100100</if_sid>
+        <field name="source.rule.groups" type="osmatch">web</field>
+        <description>Web attack attempt from a blacklisted IP.</description>
+        <group>,ban</group>
+    </rule>
+</group>
