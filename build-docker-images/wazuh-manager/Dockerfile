@@ -42,6 +42,8 @@ RUN chmod go-w /etc/filebeat/filebeat.yml
 COPY config/local_rules.xml /var/ossec/etc/rules/local_rules.xml
 COPY config/groups/ /var/ossec/etc/shared/
 COPY config/ossec.conf /var/ossec/etc/ossec.conf
+COPY config/custom-ip-check.py /var/ossec/integrations/custom-ip-check.py
+RUN chmod 750 /var/ossec/integrations/custom-ip-check.py && chown root:wazuh /var/ossec/integrations/custom-ip-check.py
 ## END
 
 ADD https://raw.githubusercontent.com/wazuh/wazuh/$FILEBEAT_TEMPLATE_BRANCH/extensions/elasticsearch/7.x/wazuh-template.json /etc/filebeat
