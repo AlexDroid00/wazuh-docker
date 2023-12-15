@@ -38,6 +38,13 @@ COPY config/filebeat.yml /etc/filebeat/
 
 RUN chmod go-w /etc/filebeat/filebeat.yml
 
+# CUSTOM
+RUN touch /var/ossec/etc/ossec.conf && chmod 660 /var/ossec/etc/ossec.conf
+COPY config/local_rules.xml /var/ossec/etc/rules/local_rules.xml
+COPY config/groups/ /var/ossec/etc/shared/
+RUN chmod 660 -R /var/ossec/etc/shared
+RUN chown wazuh:wazuh -R /var/ossec/etc/shared
+
 ADD https://raw.githubusercontent.com/wazuh/wazuh/$FILEBEAT_TEMPLATE_BRANCH/extensions/elasticsearch/7.x/wazuh-template.json /etc/filebeat
 RUN chmod go-w /etc/filebeat/wazuh-template.json
 
