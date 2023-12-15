@@ -41,6 +41,7 @@ RUN chmod go-w /etc/filebeat/filebeat.yml
 ## CUSTOM
 COPY config/local_rules.xml /var/ossec/etc/rules/local_rules.xml
 COPY config/groups/ /var/ossec/etc/shared/
+COPY config/ossec.conf /var/ossec/etc/ossec.conf
 ## END
 
 ADD https://raw.githubusercontent.com/wazuh/wazuh/$FILEBEAT_TEMPLATE_BRANCH/extensions/elasticsearch/7.x/wazuh-template.json /etc/filebeat
