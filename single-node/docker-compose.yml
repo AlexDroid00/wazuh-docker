@@ -49,6 +49,7 @@ services:
       - ./config/wazuh_cluster/local_rules.xml:/var/ossec/etc/rules/local_rules.xml
       - ./config/wazuh_cluster/groups:/var/ossec/etc/shared
       - ./config/wazuh_cluster/custom-ip-check.py:/var/ossec/integrations/custom-ip-check.py
+      - ./config/wazuh_cluster/filebeat.yml:/etc/filebeat/filebeat.yml
 
   wazuh.indexer:
     image: wazuh/wazuh-indexer:4.7.0
