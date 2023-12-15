@@ -18,7 +18,7 @@ The folder `multi-node` contains a README explaining how to run a Wazuh environm
 
 ## Installazione base (con certificati auto-firmati)
 ```bash
-sysctl -w vm.max_map_count=262144
+sudo sysctl -w vm.max_map_count=262144
 echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
 ```
 ```bash
