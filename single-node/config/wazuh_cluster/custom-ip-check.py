@@ -53,7 +53,7 @@ def in_whitelist(srcip: str, whitelist: list = whitelist) -> bool:
 
 def check_and_download_blacklists(urls: list = blacklist_urls) -> None:
     """
-    Controllo se le blacklist non esistono o se sono più vecchie di 24h.
+    Controllo se le blacklist non esistono o se sono più vecchie di 12h.
     In caso positivo, scarico la nuova versione.
     In caso negativo, non faccio nulla.
     Si presuppone che i nomi dei file siano formattati come {0..n}.list
