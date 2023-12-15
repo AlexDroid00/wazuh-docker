@@ -39,8 +39,7 @@ COPY config/filebeat.yml /etc/filebeat/
 RUN chmod go-w /etc/filebeat/filebeat.yml
 
 # CUSTOM
-COPY config/wazuh_manager.conf /var/ossec/etc/ossec.conf
-RUN chmod 660 /var/ossec/etc/ossec.conf && chown root:wazuh /var/ossec/etc/ossec.conf
+RUN touch /var/ossec/etc/ossec.conf && chmod 660 /var/ossec/etc/ossec.conf
 COPY config/local_rules.xml /var/ossec/etc/rules/local_rules.xml
 COPY config/groups/ /var/ossec/etc/shared/
 RUN chmod 660 -R /var/ossec/etc/shared
