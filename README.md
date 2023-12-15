@@ -16,6 +16,16 @@ The folder `indexer-certs-creator` contains a README explaining how to create th
 The folder `single-node` contains a README explaining how to run a Wazuh environment with one Wazuh manager, one Wazuh indexer, and one Wazuh dashboard.
 The folder `multi-node` contains a README explaining how to run a Wazuh environment with two Wazuh managers, three Wazuh indexer, and one Wazuh dashboard.
 
+## Installazione base (con certificati auto-firmati)
+```bash
+git clone https://github.com/AlexDroid00/wazuh-docker.git
+cd wazuh-docker/
+sudo ./build-docker-images/build-images.sh
+cd single-node/
+sudo docker compose -f generate-indexer-certs.yml run --rm generator
+sudo docker compose up -d
+```
+
 ## Documentation
 
 * [Wazuh full documentation](http://documentation.wazuh.com)
