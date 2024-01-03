@@ -28,16 +28,19 @@ fi
 
 # Spegno i container
 cd wazuh-docker/single-node/
-echo "Shutting down containers"
+echo "Shutting down containers..."
 docker compose down 2> /dev/null
+echo "Done."
 
 # Checkout sul nuovo branch
+echo "Updating files..."
 cd ..
-git checkout v$wazuh_version
+git fetch
+git checkout -f v$wazuh_version
 
 # Riapplico il file di configurazione ossec.conf
 cd single-node/
-wget $custom_config_url
+wget $custom_config_url -nv
 mkdir custom_config
 unzip custom_config.zip -d custom_config
 if grep -q "./config/wazuh_cluster/wazuh_manager.conf:/wazuh-config-mount/etc/ossec.conf" docker-compose.yml; then
@@ -48,7 +51,11 @@ else
 fi
 
 # Riavvio i container
-docker compose up -d
+echo "Done. Restarting..."
+docker compose up -d --quiet-pull
 
 # Pulizia
+echo "Done. Cleaning..."
 rm -R custom_config/ custom_config.zip
+
+echo "Done. Bye."
