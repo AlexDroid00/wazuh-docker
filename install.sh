@@ -35,12 +35,13 @@ cd wazuh-docker/single-node/
 wget https://github.com/AlexDroid00/wazuh-docker/raw/main/custom_config.zip
 mkdir custom_config
 unzip custom_config.zip -d custom_config
-sed -i '/- \.\/config\/wzauh_cluster\/wazuh_manager.conf:\/wazuh-config-mount\/etc\/ossec.conf/d' docker-compose.yml # La configurazione rimarrà nel volume wazuh_etc
+sed -i '/- \.\/config\/wazuh_cluster\/wazuh_manager.conf:\/wazuh-config-mount\/etc\/ossec.conf/d' docker-compose.yml # La configurazione rimarrà nel volume wazuh_etc
 
 # Genero i certificati (se necessario) e avvio
 if [[ "$@" =~ "--no-certs" ]]; then
   echo "Skipping certificate generation..."
 else
+  echo "Genero i certificati..."
   sudo docker compose -f generate-indexer-certs.yml run --rm generator
 fi
 sudo docker compose up -d
@@ -68,6 +69,6 @@ rm config/wazuh_cluster/wazuh_manager.conf # Non è più necessario
 # Riavvio solo il server o fermo compose se non sono stati ancora generati i certificati
 if [[ "$@" =~ "--no-certs" ]]; then
   docker compose down
-else
+elsea
   docker restart "$container_id"
 fi
