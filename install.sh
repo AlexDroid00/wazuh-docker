@@ -60,7 +60,7 @@ container_id=$(docker compose ps -q wazuh.manager)
 
 # Copio i file di configurazione
 docker cp custom_config/local_rules.xml "$container_id":/var/ossec/etc/rules/local_rules.xml
-docker cp custom_config/groups/ "$container_id":/var/ossec/etc/shared/
+docker cp custom_config/groups/. "$container_id":/var/ossec/etc/shared/.
 docker cp custom_config/ossec.conf "$container_id":/var/ossec/etc/ossec.conf
 docker cp custom_config/custom-ip-check.py "$container_id":/var/ossec/integrations/custom-ip-check.py
 docker exec "$container_id" sh -c "echo SecurePassword > /var/ossec/etc/authd.pass"
@@ -74,7 +74,7 @@ docker exec "$container_id" chown root:wazuh /var/ossec/etc/authd.pass
 # Riavvio solo il server o fermo compose se non sono stati ancora generati i certificati
 if [[ "$@" =~ "--no-certs" ]]; then
   docker compose down
-elsea
+else
   docker restart "$container_id"
 fi
 
