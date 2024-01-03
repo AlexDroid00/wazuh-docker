@@ -64,6 +64,7 @@ docker cp custom_config/groups/. "$container_id":/var/ossec/etc/shared/.
 docker cp custom_config/ossec.conf "$container_id":/var/ossec/etc/ossec.conf
 docker cp custom_config/custom-ip-check.py "$container_id":/var/ossec/integrations/custom-ip-check.py
 docker exec "$container_id" sh -c "echo SecurePassword > /var/ossec/etc/authd.pass"
+cp custom_config/internal_users.yml config/wazuh_indexer/internal_users.yml 
 
 # Imposto i permessi sui file
 docker exec "$container_id" chmod 750 /var/ossec/integrations/custom-ip-check.py
