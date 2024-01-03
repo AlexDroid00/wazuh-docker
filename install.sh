@@ -1,5 +1,9 @@
 #!/bin/bash
+
+# Parametri
 wazuh_version="4.7.1"
+repository="https://github.com/wazuh/wazuh-docker.git"
+custom_config_url="https://github.com/AlexDroid00/wazuh-docker/raw/main/custom_config.zip"
 
 # Verifico se lo script è stato eseguito come root
 if [[ $EUID -ne 0 ]]; then
@@ -28,20 +32,25 @@ sed -i '/vm.max_map_count/d' /etc/sysctl.conf
 echo "vm.max_map_count=262144" | tee -a /etc/sysctl.conf
 
 # Clono il repository Wazuh
-git clone https://github.com/wazuh/wazuh-docker.git -b v$wazuh_version
+git clone $repository -b v$wazuh_version
 
 # Scarico la configurazione personalizzata e lo installo
 cd wazuh-docker/single-node/
-wget https://github.com/AlexDroid00/wazuh-docker/raw/main/custom_config.zip
+wget $custom_config_url
 mkdir custom_config
 unzip custom_config.zip -d custom_config
-sed -i '/- \.\/config\/wazuh_cluster\/wazuh_manager.conf:\/wazuh-config-mount\/etc\/ossec.conf/d' docker-compose.yml # La configurazione rimarrà nel volume wazuh_etc
+if grep -q "./config/wazuh_cluster/wazuh_manager.conf:/wazuh-config-mount/etc/ossec.conf" docker-compose.yml; then
+    sed -i '/- \.\/config\/wazuh_cluster\/wazuh_manager.conf:\/wazuh-config-mount\/etc\/ossec.conf/d' docker-compose.yml # La configurazione rimarrà nel volume wazuh_etc
+    rm config/wazuh_cluster/wazuh_manager.conf # Non è più necessario
+else
+    echo "I was unable to remove mounting of the ossec.conf file. Configuration may be incorrect."
+fi
 
 # Genero i certificati (se necessario) e avvio
 if [[ "$@" =~ "--no-certs" ]]; then
   echo "Skipping certificate generation..."
 else
-  echo "Genero i certificati..."
+  echo "Generating certs..."
   sudo docker compose -f generate-indexer-certs.yml run --rm generator
 fi
 sudo docker compose up -d
@@ -62,13 +71,12 @@ docker exec "$container_id" chown root:wazuh /var/ossec/integrations/custom-ip-c
 docker exec "$container_id" chmod 640 /var/ossec/etc/authd.pass
 docker exec "$container_id" chown root:wazuh /var/ossec/etc/authd.pass
 
-# Pulizia
-rm -R custom_config/ custom_config.zip
-rm config/wazuh_cluster/wazuh_manager.conf # Non è più necessario
-
 # Riavvio solo il server o fermo compose se non sono stati ancora generati i certificati
 if [[ "$@" =~ "--no-certs" ]]; then
   docker compose down
 elsea
   docker restart "$container_id"
 fi
+
+# Pulizia
+rm -R custom_config/ custom_config.zip
