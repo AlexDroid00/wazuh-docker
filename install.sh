@@ -1,26 +1,29 @@
 #!/bin/bash
 
 # Parametri
-wazuh_version="4.7.1"
 repository="https://github.com/wazuh/wazuh-docker.git"
 custom_config_url="https://github.com/AlexDroid00/wazuh-docker/raw/main/custom_config.zip"
+read -p "Enter the Wazuh version [4.7.1]: " wazuh_version
+wazuh_version=${wazuh_version:-"4.7.1"}
+read -p "Enter the heap size to use for Wazuh Indexer [4g]: " heap_size
+heap_size=${heap_size:-"4g"}
 
 # Verifico se lo script è stato eseguito come root
 if [[ $EUID -ne 0 ]]; then
   echo "This script must be run as root"
   exit 1
 fi
-# Verifica se unzip è installato
+# Verifico se unzip è installato
 if ! command -v unzip &> /dev/null; then
     echo "unzip is not installed"
     exit 1
 fi
-# Verifica se docker è installato
+# Verifico se docker è installato
 if ! command -v docker &> /dev/null; then
     echo "docker is not installed"
     exit 1
 fi
-# Verifica se docker-compose è installato
+# Verifico se docker-compose è installato
 if ! command -v docker compose &> /dev/null; then
     echo "docker compose is not installed"
     exit 1
@@ -36,15 +39,16 @@ git clone $repository -b v$wazuh_version
 
 # Scarico la configurazione personalizzata e lo installo
 cd wazuh-docker/single-node/
-wget $custom_config_url
+wget $custom_config_url -nv
 mkdir custom_config
 unzip custom_config.zip -d custom_config
 if grep -q "./config/wazuh_cluster/wazuh_manager.conf:/wazuh-config-mount/etc/ossec.conf" docker-compose.yml; then
     sed -i '/- \.\/config\/wazuh_cluster\/wazuh_manager.conf:\/wazuh-config-mount\/etc\/ossec.conf/d' docker-compose.yml # La configurazione rimarrà nel volume wazuh_etc
     rm config/wazuh_cluster/wazuh_manager.conf # Non è più necessario
 else
-    echo "I was unable to remove mounting of the ossec.conf file. Configuration may be incorrect."
+    echo "I was unable to remove mounting of the ossec.conf file in docker-compose.yml. Configuration may be incorrect."
 fi
+sed -i "s/512m/$heap_size/g" docker-compose.yml # Heap size
 
 # Genero i certificati (se necessario) e avvio
 if [[ "$@" =~ "--no-certs" ]]; then
