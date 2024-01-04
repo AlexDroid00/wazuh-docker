@@ -71,6 +71,8 @@ docker exec "$container_id" sh -c "echo SecurePassword > /var/ossec/etc/authd.pa
 cp custom_config/internal_users.yml config/wazuh_indexer/internal_users.yml 
 
 # Imposto i permessi sui file
+docker exec "$container_id" chmod 660 /var/ossec/etc/ossec.conf
+docker exec "$container_id" chown root:wazuh /var/ossec/etc/ossec.conf
 docker exec "$container_id" chmod 750 /var/ossec/integrations/custom-ip-check.py
 docker exec "$container_id" chown root:wazuh /var/ossec/integrations/custom-ip-check.py
 docker exec "$container_id" chmod 640 /var/ossec/etc/authd.pass
