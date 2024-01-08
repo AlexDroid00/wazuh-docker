@@ -1,18 +1,18 @@
 #!/var/ossec/framework/python/bin/python3
 
-###
-# COSTANTI
-###
-blacklist_urls = [
+BLACKLIST_URLS = [
     "http://iplists.firehol.org/files/firehol_level3.netset",
     "http://iplists.firehol.org/files/firehol_level2.netset",
 ]  # Lists will be parsed in order. Use only HTTP.
 
-whitelist = [
+WHITELIST = [
     
 ] # You can use CIDR notation
 
-update_interval = 60 * 60 * 12 #seconds*minutes*hours --> value must be in seconds
+BLACKLIST_DIR = 'tmp'
+UPDATE_INTERVAL = 60 * 60 * 12 # seconds*minutes*hours --> value must be in seconds
+LOG_FILE_PATH = 'logs/integrations.log'
+
 
 import sys
 import json
@@ -20,18 +20,21 @@ import os
 import ipaddress
 import time
 import urllib.request
+import logging
 from socket import socket, AF_UNIX, SOCK_DGRAM
 
+logging.basicConfig(filename=LOG_FILE_PATH, encoding='utf-8', level=logging.INFO, format='%(asctime)s ip-check[%(process)d]: %(levelname)s: %(message)s')
 
-def in_blacklist(srcip: str, urls: list = blacklist_urls) -> bool:
+
+def in_blacklist(srcip: str, urls: list = BLACKLIST_URLS) -> bool:
     """
     Controlla se l'indirizzo IP si trova tra le subnet indicate nei file
     di blacklist. Ritorna True se lo trova, False altrimenti
     """
     check_and_download_blacklists()
     ip = ipaddress.ip_address(srcip)
-    for i in range(len(urls)):
-        file_path = f"tmp/{i}.list"
+    for i, url in enumerate(urls):
+        file_path = file_path = os.path.join(BLACKLIST_DIR, f"{i}.list")
         with open(file_path, "r") as f:
             subnet_list = [line.strip() for line in f if not line.startswith("#")]
             for subnet in subnet_list:
@@ -39,7 +42,7 @@ def in_blacklist(srcip: str, urls: list = blacklist_urls) -> bool:
                     return True
     return False
 
-def in_whitelist(srcip: str, whitelist: list = whitelist) -> bool:
+def in_whitelist(srcip: str, whitelist: list = WHITELIST) -> bool:
     """
     Controlla se l'indirizzo IP si trova all'interno delle subnet definite
     in whitelist. Ritorna True se lo trova, False altrimenti
@@ -51,26 +54,29 @@ def in_whitelist(srcip: str, whitelist: list = whitelist) -> bool:
     return False
 
 
-def check_and_download_blacklists(urls: list = blacklist_urls) -> None:
+def check_and_download_blacklists(urls: list = BLACKLIST_URLS) -> None:
     """
-    Controllo se le blacklist non esistono o se sono più vecchie di 12h.
+    Controllo se le blacklist non esistono o se sono più vecchie di 12h (o UPDATE_INTERVAL).
     In caso positivo, scarico la nuova versione.
     In caso negativo, non faccio nulla.
     Si presuppone che i nomi dei file siano formattati come {0..n}.list
     """
-    for i in range(len(urls)):
-        file_path = f"tmp/{i}.list"
+    for i, url in enumerate(urls):
+        file_path = os.path.join(BLACKLIST_DIR, f"{i}.list")
         if os.path.exists(file_path):
             last_file_mod_time = os.path.getmtime(file_path)
             current_time = time.time()
-            if current_time - last_file_mod_time < update_interval:
+            if current_time - last_file_mod_time < UPDATE_INTERVAL:
                 pass
-        # File download
-        req = urllib.request.Request(urls[i], headers={"User-Agent": "Mozilla/5.0"})
-        response = urllib.request.urlopen(req)
-        data = response.read()
-        with open(file_path, "wb") as f:
-            f.write(data)
+        try:
+            # File download
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            response = urllib.request.urlopen(req)
+            data = response.read()
+            with open(file_path, "wb") as f:
+                f.write(data)
+        except Exception as e:
+            logging.error(f"Error downloading blacklist from {url}: {e}")
 
 
 def send_event(msg, agent=None):
@@ -99,30 +105,51 @@ def send_event(msg, agent=None):
 """
 MAIN
 """
-# Read alert file name from sys args
-alert_file = open(sys.argv[1])
+try:
+    # Read alert file name from sys args
+    alert_file = open(sys.argv[1])
+    # Read the alert file
+    alert = json.loads(alert_file.read())
+    alert_file.close()
+except Exception as e:
+    logging.error(f"Error reading alert: {e}")
+    sys.exit(1)
 
-# Read the alert file
-alert = json.loads(alert_file.read())
-alert_file.close()
-
-# Extract srcip field
-if "data" not in alert or "srcip" not in alert["data"]:
+# Extract ip field
+srcip = None
+if "data" in alert:
+    # Linux srcip
+    if "srcip" in alert["data"]:
+        srcip = alert["data"]["srcip"] # Found data.srcip
+    # Windows srcip
+    elif "win" in alert["data"] and "eventdata" in alert["data"]["win"]:
+        if "remoteAddress" in alert["data"]["win"]["eventdata"]:
+            logging.debug("Found Windows Event with srcip.")
+            srcip = alert["data"]["win"]["eventdata"]["remoteAddress"] # Found data.win.eventdata.remoteAddress
+        elif "ipAddress" in alert["data"]["win"]["eventdata"]:
+            logging.debug("Found Windows Event with srcip.")
+            srcip = alert["data"]["win"]["eventdata"]["ipAddress"] # Found data.win.eventdata.ipAddress
+if not srcip:
+    logging.debug("No srcip. Exiting.")
     sys.exit(0)
-srcip = alert["data"]["srcip"]
 
 # Checking if IP is in the blacklist
 if not in_whitelist(srcip) and in_blacklist(srcip):
     # Ip found. Creating alert
-    alert_output = {}
-    alert_output["ip-check"] = {"found": 1}
-    alert_output["integration"] = "custom-ip-check"
-    alert_output["srcip"] = srcip
-    alert_output["source"] = {}
-    alert_output["source"]["alert_id"] = alert["id"]
-    alert_output["source"]["rule"] = alert["rule"]
-    alert_output["source"]["description"] = alert["rule"]["description"]
-    alert_output["source"]["full_log"] = alert["full_log"]
+    logging.info(f"{srcip} found in blacklist.")
+    alert_output = {
+        "ip-check": {"found": 1},
+        "integration": "custom-ip-check",
+        "srcip": srcip,
+        "source": {
+            "alert_id": alert["id"],
+            "rule": alert["rule"],
+            "description": alert["rule"]["description"],
+            "full_log": alert["full_log"],
+        },
+    }
     send_event(alert_output, alert["agent"])
+else:
+    logging.info(f"{srcip} NOT found in blacklist.")
 
 sys.exit(0)
