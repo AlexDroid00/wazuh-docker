@@ -1,0 +1,45 @@
+{
+    "policy": {
+        "policy_id": "wazuh-alerts-retention-policy",
+        "description": "Wazuh alerts will be deleted after 120d.",
+        "schema_version": 18,
+        "error_notification": null,
+        "default_state": "initial",
+        "states": [
+            {
+                "name": "initial",
+                "actions": [],
+                "transitions": [
+                    {
+                        "state_name": "delete_alerts",
+                        "conditions": {
+                            "min_index_age": "120d"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "delete_alerts",
+                "actions": [
+                    {
+                        "retry": {
+                            "count": 3,
+                            "backoff": "exponential",
+                            "delay": "1m"
+                        },
+                        "delete": {}
+                    }
+                ],
+                "transitions": []
+            }
+        ],
+        "ism_template": [
+            {
+                "index_patterns": [
+                    "wazuh-alerts-*"
+                ],
+                "priority": 1
+            }
+        ]
+    }
+}

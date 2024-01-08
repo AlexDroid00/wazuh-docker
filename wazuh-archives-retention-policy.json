@@ -1,0 +1,45 @@
+{
+    "policy": {
+        "policy_id": "wazuh-archives-retention-policy",
+        "description": "Wazuh archives will be deleted after 90d.",
+        "schema_version": 18,
+        "error_notification": null,
+        "default_state": "initial",
+        "states": [
+            {
+                "name": "initial",
+                "actions": [],
+                "transitions": [
+                    {
+                        "state_name": "delete_archives",
+                        "conditions": {
+                            "min_index_age": "90d"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "delete_archives",
+                "actions": [
+                    {
+                        "retry": {
+                            "count": 3,
+                            "backoff": "exponential",
+                            "delay": "1m"
+                        },
+                        "delete": {}
+                    }
+                ],
+                "transitions": []
+            }
+        ],
+        "ism_template": [
+            {
+                "index_patterns": [
+                    "wazuh-archives-*"
+                ],
+                "priority": 1
+            }
+        ]
+    }
+}
