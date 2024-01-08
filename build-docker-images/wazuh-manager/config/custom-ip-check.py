@@ -1,5 +1,11 @@
 #!/var/ossec/framework/python/bin/python3
 
+"""
+Script di integrazione Wazuh per il controllo IP con blacklists
+
+Autore: Alessandro Schivano
+"""
+
 BLACKLIST_URLS = [
     "http://iplists.firehol.org/files/firehol_level3.netset",
     "http://iplists.firehol.org/files/firehol_level2.netset",
@@ -28,8 +34,8 @@ logging.basicConfig(filename=LOG_FILE_PATH, encoding='utf-8', level=logging.INFO
 
 def in_blacklist(srcip: str, urls: list = BLACKLIST_URLS) -> bool:
     """
-    Controlla se l'indirizzo IP si trova tra le subnet indicate nei file
-    di blacklist. Ritorna True se lo trova, False altrimenti
+    Controlla se l'indirizzo IP si trova in una delle subnet indicate nei file di blacklist. 
+    Ritorna True se lo trova, False altrimenti.
     """
     check_and_download_blacklists()
     ip = ipaddress.ip_address(srcip)
@@ -44,8 +50,8 @@ def in_blacklist(srcip: str, urls: list = BLACKLIST_URLS) -> bool:
 
 def in_whitelist(srcip: str, whitelist: list = WHITELIST) -> bool:
     """
-    Controlla se l'indirizzo IP si trova all'interno delle subnet definite
-    in whitelist. Ritorna True se lo trova, False altrimenti
+    Controlla se l'indirizzo IP si trova all'interno di una delle subnet definite nella whitelist.
+    Ritorna True se lo trova, False altrimenti.
     """
     ip = ipaddress.ip_address(srcip)
     for subnet in whitelist:
@@ -75,6 +81,7 @@ def check_and_download_blacklists(urls: list = BLACKLIST_URLS) -> None:
             data = response.read()
             with open(file_path, "wb") as f:
                 f.write(data)
+            logging.info(f"Successfully downloaded list {i}")
         except Exception as e:
             logging.error(f"Error downloading blacklist from {url}: {e}")
 
