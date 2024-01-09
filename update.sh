@@ -44,6 +44,7 @@ echo "Done."
 # Copio i file di configurazione
 if [ keep_config = true ] ; then
     cp -r single-node/config /tmp/wazuh_cfg_backup
+    cp single-node/docker-compose.yml /tmp/wazuh_cfg_backup/docker-compose.yml
 fi
 
 # Checkout sul nuovo branch
@@ -56,12 +57,13 @@ git checkout -f v$wazuh_version
 cd single-node/
 if grep -q "./config/wazuh_cluster/wazuh_manager.conf:/wazuh-config-mount/etc/ossec.conf" docker-compose.yml; then
     sed -i '/- \.\/config\/wazuh_cluster\/wazuh_manager.conf:\/wazuh-config-mount\/etc\/ossec.conf/d' docker-compose.yml # La configurazione si trova già nel volume wazuh_etc
-    mv config/wazuh_cluster/wazuh_manager.conf config/wazuh_cluster/wazuh_manager.conf.new # Per riferimenti futuri
+    mv config/wazuh_cluster/wazuh_manager.conf config/wazuh_cluster/wazuh_manager.conf.new # Potrebbe servire
 else
     echo "I was unable to remove mounting of the ossec.conf file. Configuration may be incorrect."
 fi
 sed -i "s/512m/$heap_size/g" docker-compose.yml # Heap size
 if [ keep_config = true ] ; then
+    mv /tmp/wazuh_cfg_backup/docker-compose.yml single-node/docker-compose.yml.old
     cp -r /tmp/wazuh_cfg_backup single-node/config
     rm -r /tmp/wazuh_cfg_backup
 fi
