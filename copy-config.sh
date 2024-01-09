@@ -8,6 +8,9 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
+# Cambio le password
+bash /usr/share/wazuh-indexer/plugins/opensearch-security/tools/wazuh-passwords-tool.sh -a -gf wazuh-passwords.txt
+
 # Fermo i servizi
 echo "Stopping services..."
 service wazuh-manager stop
@@ -38,9 +41,6 @@ chown root:wazuh /var/ossec/etc/authd.pass
 chmod 770 /var/ossec/etc/shared/apache /var/ossec/etc/shared/nginx
 chown wazuh:wazuh -R /var/ossec/etc/shared/apache/ /var/ossec/etc/shared/nginx/
 chmod 640 /var/ossec/etc/shared/apache/agent.conf /var/ossec/etc/shared/nginx/agent.conf
-
-# Cambio le password
-bash /usr/share/wazuh-indexer/plugins/opensearch-security/tools/wazuh-passwords-tool.sh -a -gf wazuh-passwords.txt
 
 # Riavvio i servizi
 echo "Restarting services..."
