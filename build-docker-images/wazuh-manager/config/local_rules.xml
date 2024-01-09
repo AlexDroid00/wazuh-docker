@@ -1,6 +1,6 @@
 <!-- Local rules -->
-
 <!-- Copyright (C) 2015, Wazuh Inc. -->
+<!-- Modified by: Alessandro Schivano -->
 
 <!-- CUSTOM: Disabilita il falso positivo di /bin/diff -->
 <group name="rootcheck,ossec,">
@@ -42,5 +42,12 @@
         <field name="source.rule.groups" type="osmatch">web</field>
         <description>Web attack attempt from a blacklisted IP.</description>
         <group>,ban</group>
+    </rule>
+</group>
+
+<group name="ban,">
+    <rule id="100200" level="14">
+      <if_sid>31168,31169</if_sid>
+      <description>Shellshock attack detected</description>
     </rule>
 </group>
