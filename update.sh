@@ -2,8 +2,8 @@
 
 # Parametri
 repository="https://github.com/wazuh/wazuh-docker.git"
-read -p "Enter the new Wazuh version [4.7.1]: " wazuh_version
-wazuh_version=${wazuh_version:-"4.7.1"}
+read -p "Enter the new Wazuh version [4.7.2]: " wazuh_version
+wazuh_version=${wazuh_version:-"4.7.2"}
 read -p "Enter the heap size to use for Wazuh Indexer [4g]: " heap_size
 heap_size=${heap_size:-"4g"}
 read -p "Do you want to keep config files? [Y/n] " yn

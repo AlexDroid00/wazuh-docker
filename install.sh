@@ -3,8 +3,8 @@
 # Parametri
 repository="https://github.com/wazuh/wazuh-docker.git"
 custom_config_url="https://github.com/AlexDroid00/wazuh-docker/raw/main/custom_config.zip"
-read -p "Enter the Wazuh version [4.7.1]: " wazuh_version
-wazuh_version=${wazuh_version:-"4.7.1"}
+read -p "Enter the Wazuh version [4.7.2]: " wazuh_version
+wazuh_version=${wazuh_version:-"4.7.2"}
 read -p "Enter the heap size to use for Wazuh Indexer [4g]: " heap_size
 heap_size=${heap_size:-"4g"}
 
