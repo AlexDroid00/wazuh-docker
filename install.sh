@@ -1,13 +1,5 @@
 #!/bin/bash
 
-# Parametri
-repository="https://github.com/wazuh/wazuh-docker.git"
-custom_config_url="https://github.com/AlexDroid00/wazuh-docker/raw/main/custom_config.zip"
-read -p "Enter the Wazuh version [4.7.2]: " wazuh_version
-wazuh_version=${wazuh_version:-"4.7.2"}
-read -p "Enter the heap size to use for Wazuh Indexer [4g]: " heap_size
-heap_size=${heap_size:-"4g"}
-
 # Verifico se lo script è stato eseguito come root
 if [[ $EUID -ne 0 ]]; then
   echo "This script must be run as root"
@@ -23,11 +15,20 @@ if ! command -v docker &> /dev/null; then
     echo "docker is not installed"
     exit 1
 fi
-# Verifico se docker-compose è installato
+# Verifico se docker compose è installato
 if ! command -v docker compose &> /dev/null; then
     echo "docker compose is not installed"
     exit 1
 fi
+
+# Parametri
+repository="https://github.com/wazuh/wazuh-docker.git"
+custom_config_url="https://github.com/AlexDroid00/wazuh-docker/raw/main/custom_config.zip"
+read -p "Enter the Wazuh version [4.7.2]: " wazuh_version
+wazuh_version=${wazuh_version:-"4.7.2"}
+read -p "Enter the heap size to use for Wazuh Indexer [4g]: " heap_size
+heap_size=${heap_size:-"4g"}
+
 
 # Configuro il memory mapping
 sysctl -w vm.max_map_count=262144

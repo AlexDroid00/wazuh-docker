@@ -1,5 +1,33 @@
 #!/bin/bash
 
+# Verifico se lo script è stato eseguito come root
+if [[ $EUID -ne 0 ]]; then
+  echo "This script must be run as root"
+  exit 1
+fi
+# Verifico se unzip è installato
+if ! command -v unzip &> /dev/null; then
+    echo "unzip is not installed"
+    exit 1
+fi
+# Verifico se docker è installato
+if ! command -v docker &> /dev/null; then
+    echo "docker is not installed"
+    exit 1
+fi
+# Verifico se docker compose è installato
+if ! command -v docker compose &> /dev/null; then
+    echo "docker compose is not installed"
+    exit 1
+fi
+# Verifico se mi trovo nella cartella di wazuh
+if test -d wazuh-docker; then
+    cd wazuh-docker/
+elif ! test -d  single-node; then
+    echo "This script must be run in wazuh-docker folder"
+    exit 1
+fi
+
 # Parametri
 repository="https://github.com/wazuh/wazuh-docker.git"
 read -p "Enter the new Wazuh version [4.7.2]: " wazuh_version
@@ -14,29 +42,8 @@ case $yn in
         keep_config=true;;
 esac
 
-# Verifico se lo script è stato eseguito come root
-if [[ $EUID -ne 0 ]]; then
-  echo "This script must be run as root"
-  exit 1
-fi
-# Verifica se unzip è installato
-if ! command -v unzip &> /dev/null; then
-    echo "unzip is not installed"
-    exit 1
-fi
-# Verifica se docker è installato
-if ! command -v docker &> /dev/null; then
-    echo "docker is not installed"
-    exit 1
-fi
-# Verifica se docker-compose è installato
-if ! command -v docker compose &> /dev/null; then
-    echo "docker compose is not installed"
-    exit 1
-fi
-
 # Spegno i container
-cd wazuh-docker/single-node/
+cd single-node/
 echo "Shutting down containers..."
 docker compose down 2> /dev/null
 echo "Done."
