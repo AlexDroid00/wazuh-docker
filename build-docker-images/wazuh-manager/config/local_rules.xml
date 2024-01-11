@@ -2,52 +2,67 @@
 <!-- Copyright (C) 2015, Wazuh Inc. -->
 <!-- Modified by: Alessandro Schivano -->
 
-<!-- CUSTOM: Disabilita il falso positivo di /bin/diff -->
+
+<!-- Disabilita il falso positivo di /bin/diff -->
 <group name="rootcheck,ossec,">
-  <rule id="510" level="0" overwrite="yes">
-    <match>/bin/diff</match>
-    <description>Ignore 510 rootcheck on /bin/diff</description>
-  </rule>
+	<rule id="510" level="0" overwrite="yes">
+		<match>/bin/diff</match>
+		<description>Ignore 510 rootcheck on /bin/diff</description>
+	</rule>
 </group>
 
 
-<!-- CUSTOM: Set di regole con controllo dell'IP sorgente -->
+<!-- Set di regole con controllo dell'IP sorgente -->
 <group name="ipcheck,">
-    <rule id="100100" level="6">
-        <field name="integration">custom-ip-check</field>
-        <description>Ip-Check: IP Address found in a blacklist.</description>
-    </rule>
-    <rule id="100101" level="8">
-        <if_sid>100100</if_sid>
-        <field name="source.rule.groups" type="osmatch">sshd</field>
-        <field name="source.rule.groups" type="osmatch">authentication_failed</field>
-        <field name="source.full_log" type="osmatch" negate="yes">preauth</field> <!-- Fix SSH double match --> 
-        <description>SSH authentication failed from a blacklisted IP.</description>
-        <group>,ban</group>
-    </rule>
-    <rule id="100102" level="15">
-        <if_sid>100100</if_sid>
-        <field name="source.rule.groups" type="osmatch">authentication_success</field>
-        <description>WARNING: Authentication success from a blacklisted IP.</description>
-    </rule>
-    <rule id="100103" level="8">
-        <if_sid>100100</if_sid>
-        <field name="source.rule.groups" type="osmatch">ftp</field>
-        <field name="source.rule.groups" type="osmatch">authentication_failed</field>
-        <description>FTP authentication failed from a blacklisted IP.</description>
-        <group>,ban</group>
-    </rule>
-    <rule id="100104" level="8">
-        <if_sid>100100</if_sid>
-        <field name="source.rule.groups" type="osmatch">web</field>
-        <description>Web attack attempt from a blacklisted IP.</description>
-        <group>,ban</group>
-    </rule>
+	<rule id="100100" level="6">
+		<field name="integration">custom-ip-check</field>
+		<description>Ip-Check: IP Address found in a blacklist.</description>
+	</rule>
+	<rule id="100101" level="8">
+		<if_sid>100100</if_sid>
+		<field name="source.rule.groups" type="osmatch">sshd</field>
+		<field name="source.rule.groups" type="osmatch">authentication_failed</field>
+		<field name="source.full_log" type="osmatch" negate="yes">preauth</field> <!-- Fix SSH double match -->
+		<description>SSH authentication failed from a blacklisted IP.</description>
+		<group>,ban</group>
+	</rule>
+	<rule id="100102" level="15">
+		<if_sid>100100</if_sid>
+		<field name="source.rule.groups" type="osmatch">authentication_success</field>
+		<description>WARNING: Authentication success from a blacklisted IP.</description>
+	</rule>
+	<rule id="100103" level="8">
+		<if_sid>100100</if_sid>
+		<field name="source.rule.groups" type="osmatch">ftp</field>
+		<field name="source.rule.groups" type="osmatch">authentication_failed</field>
+		<description>FTP authentication failed from a blacklisted IP.</description>
+		<group>,ban</group>
+	</rule>
+	<rule id="100104" level="8">
+		<if_sid>100100</if_sid>
+		<field name="source.rule.groups" type="osmatch">web</field>
+		<description>Web attack attempt from a blacklisted IP.</description>
+		<group>,ban</group>
+	</rule>
 </group>
 
+
+<!-- Set di regole con ban dell'ip sorgente -->
 <group name="ban,">
-    <rule id="100200" level="14">
-      <if_sid>31168,31169</if_sid>
-      <description>Shellshock attack detected</description>
-    </rule>
+	<rule id="100200" level="10">
+		<if_sid>31168,31169</if_sid>
+		<description>Shellshock attack detected. Ban.</description>
+		<mitre>
+			<id>T1068</id>
+			<id>T1190</id>
+		</mitre>
+	</rule>
+	<rule id="100201" level="8">
+		<if_sid>31510</if_sid>
+		<description>CMS (WordPress or Joomla) brute force attempt. Ban.</description>
+		<mitre>
+			<id>T1110</id>
+		</mitre>
+		<group>pci_dss_6.5,pci_dss_11.4,pci_dss_6.5.10,pci_dss_10.2.4,pci_dss_10.2.5,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_SA.11,nist_800_53_SI.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.6,tsc_CC7.1,tsc_CC8.1,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+	</rule>
 </group>
