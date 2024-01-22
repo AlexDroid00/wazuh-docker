@@ -7,6 +7,11 @@ if [[ $EUID -ne 0 ]]; then
   echo "This script must be run as root"
   exit 1
 fi
+# Verifico se unzip è installato
+if ! command -v unzip &> /dev/null; then
+    echo "unzip is not installed"
+    exit 1
+fi
 
 # Cambio le password
 bash /usr/share/wazuh-indexer/plugins/opensearch-security/tools/wazuh-passwords-tool.sh -a -gf wazuh-passwords.txt
@@ -38,9 +43,9 @@ chmod 750 /var/ossec/integrations/custom-ip-check.py
 chown root:wazuh /var/ossec/integrations/custom-ip-check.py
 chmod 640 /var/ossec/etc/authd.pass
 chown root:wazuh /var/ossec/etc/authd.pass
-chmod 770 /var/ossec/etc/shared/apache /var/ossec/etc/shared/nginx
-chown wazuh:wazuh -R /var/ossec/etc/shared/apache/ /var/ossec/etc/shared/nginx/
-chmod 640 /var/ossec/etc/shared/apache/agent.conf /var/ossec/etc/shared/nginx/agent.conf
+chmod 770 /var/ossec/etc/shared/apache /var/ossec/etc/shared/nginx /var/ossec/etc/shared/iis
+chown wazuh:wazuh -R /var/ossec/etc/shared/apache/ /var/ossec/etc/shared/nginx/ /var/ossec/etc/shared/iis/
+chmod 640 /var/ossec/etc/shared/apache/agent.conf /var/ossec/etc/shared/nginx/agent.conf /var/ossec/etc/shared/iis/agent.conf
 
 # Riavvio i servizi
 echo "Restarting services..."

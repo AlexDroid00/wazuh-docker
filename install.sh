@@ -79,9 +79,9 @@ docker exec "$container_id" chmod 750 /var/ossec/integrations/custom-ip-check.py
 docker exec "$container_id" chown root:wazuh /var/ossec/integrations/custom-ip-check.py
 docker exec "$container_id" chmod 640 /var/ossec/etc/authd.pass
 docker exec "$container_id" chown root:wazuh /var/ossec/etc/authd.pass
-docker exec "$container_id" chmod 770 /var/ossec/etc/shared/apache /var/ossec/etc/shared/nginx
-docker exec "$container_id" chown wazuh:wazuh -R /var/ossec/etc/shared/apache/ /var/ossec/etc/shared/nginx/
-docker exec "$container_id" chmod 640 /var/ossec/etc/shared/apache/agent.conf /var/ossec/etc/shared/nginx/agent.conf
+docker exec "$container_id" chmod 770 /var/ossec/etc/shared/apache /var/ossec/etc/shared/nginx /var/ossec/etc/shared/iis
+docker exec "$container_id" chown wazuh:wazuh -R /var/ossec/etc/shared/apache/ /var/ossec/etc/shared/nginx/ /var/ossec/etc/shared/iis/
+docker exec "$container_id" chmod 640 /var/ossec/etc/shared/apache/agent.conf /var/ossec/etc/shared/nginx/agent.conf /var/ossec/etc/shared/iis/agent.conf
 # Riavvio solo il server o fermo compose se non sono stati ancora generati i certificati
 if [[ "$@" =~ "--no-certs" ]]; then
   docker compose down

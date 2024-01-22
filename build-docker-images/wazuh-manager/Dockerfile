@@ -44,8 +44,12 @@ COPY config/groups/ /var/ossec/etc/shared/
 COPY config/ossec.conf /var/ossec/etc/ossec.conf
 COPY config/custom-ip-check.py /var/ossec/integrations/custom-ip-check.py
 RUN chmod 750 /var/ossec/integrations/custom-ip-check.py && chown root:wazuh /var/ossec/integrations/custom-ip-check.py
+RUN chmod 660 /var/ossec/etc/ossec.conf && chown root:wazuh /var/ossec/etc/ossec.conf
 RUN echo "SecurePassword" > /var/ossec/etc/authd.pass
 RUN chmod 640 /var/ossec/etc/authd.pass && chown root:wazuh /var/ossec/etc/authd.pass
+RUN chmod 770 /var/ossec/etc/shared/apache /var/ossec/etc/shared/nginx /var/ossec/etc/shared/iis 
+RUN chown wazuh:wazuh -R /var/ossec/etc/shared/apache/ /var/ossec/etc/shared/nginx/ /var/ossec/etc/shared/iis/
+RUN chmod 640 /var/ossec/etc/shared/apache/agent.conf /var/ossec/etc/shared/nginx/agent.conf /var/ossec/etc/shared/iis/agent.conf
 ## END CUSTOM
 
 ADD https://raw.githubusercontent.com/wazuh/wazuh/$FILEBEAT_TEMPLATE_BRANCH/extensions/elasticsearch/7.x/wazuh-template.json /etc/filebeat
