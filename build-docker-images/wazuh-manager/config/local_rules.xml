@@ -2,12 +2,22 @@
 <!-- Copyright (C) 2015, Wazuh Inc. -->
 <!-- Modified by: Alessandro Schivano -->
 
+<!-- Set di regole specifiche per ogni agent -->
 
-<!-- Disabilita il falso positivo di /bin/diff -->
+
+<!-- Set di regole per disabilitare i falsi positivi -->
 <group name="rootcheck,ossec,">
 	<rule id="510" level="0" overwrite="yes">
 		<match>/bin/diff</match>
 		<description>Ignore 510 rootcheck on /bin/diff</description>
+	</rule>
+</group>
+<group name="web,">
+	<rule id="100301" level="0">
+		<if_sid>31516</if_sid>
+		<url>/server-status?auto</url>
+		<srcip>127.0.0.1</srcip>
+		<description>Ignoring request.</description>
 	</rule>
 </group>
 
