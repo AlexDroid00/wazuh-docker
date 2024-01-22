@@ -73,7 +73,7 @@ def check_and_download_blacklists(urls: list = BLACKLIST_URLS) -> None:
             last_file_mod_time = os.path.getmtime(file_path)
             current_time = time.time()
             if current_time - last_file_mod_time < UPDATE_INTERVAL:
-                pass
+                continue
         try:
             # File download
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
@@ -149,10 +149,10 @@ if not in_whitelist(srcip) and in_blacklist(srcip):
         "integration": "custom-ip-check",
         "srcip": srcip,
         "source": {
-            "alert_id": alert["id"],
+            "alert_id": alert.get("id"),
             "rule": alert["rule"],
             "description": alert["rule"]["description"],
-            "full_log": alert["full_log"],
+            "full_log": alert.get("full_log"),
         },
     }
     send_event(alert_output, alert["agent"])
